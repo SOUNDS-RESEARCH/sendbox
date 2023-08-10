@@ -4,6 +4,8 @@
 # (c) Paul Didier, SOUNDS ETN, KU Leuven ESAT STADIUS
 
 import sys
+import librosa
+import matplotlib.pyplot as plt
 
 FILENAME = 'output.opus'
 
@@ -13,7 +15,11 @@ def main():
 
 def read_opus(fileName):
     """Read an opus file and return the data."""
-    pass
+    X, sr = librosa.load(
+        fileName,
+        res_type='kaiser_fast'
+    )
+    plt.plot(X)
 
 if __name__ == '__main__':
     sys.exit(main())
