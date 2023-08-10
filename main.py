@@ -1,7 +1,8 @@
 import numpy as np
 import os
-from sys import platform as PLATFORM
 
+# Global variables
+from sys import platform as PLATFORM
 OPUS_DIR = 'opus'
 
 def call_opus_encoder(
@@ -19,13 +20,13 @@ def call_opus_encoder(
     )
 
     if encoding_check == 1:
-        raise Exception("Encoding did not go correct !!")
+        raise Exception("Encoding failed !!")
     
 
 def call_opus_decoder(
         opus_filename,
         wav_out_name,
-        decoder_name='opusdec_win'
+        decoder_name='opusdec'
     ):
     """Call the opus decoder with the given parameters."""
 
@@ -36,7 +37,7 @@ def call_opus_decoder(
     )
 
     if decoding_check == 1:
-        raise Exception("Decoding did not go correct !!")
+        raise Exception("Decoding failed !!")
 
 
 def build_opus_path(encoder_name):
@@ -54,16 +55,17 @@ def build_opus_path(encoder_name):
 
 
 if __name__ == '__main__':
-    name = 'test.flac'
-    # name_decoded = 'test.opus'
 
+    opus_out_name = 'output.opus'
+
+    # Encode audio file into OPUS
     call_opus_encoder(
-        wav_filename=name,
-        opus_out_name='output.opus',
-        encoder_name='opusenc_win'
+        wav_filename='test.flac',
+        opus_out_name=opus_out_name,
     )
+
+    # Decode OPUS file into audio
     call_opus_decoder(
-        opus_filename='output.opus',
+        opus_filename=opus_out_name,
         wav_out_name='output.wav',
-        decoder_name='opusdec_win'
     )
