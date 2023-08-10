@@ -45,9 +45,10 @@ def build_opus_path(encoder_name):
     depending on the platform."""
 
     fullPathOpus = f'{OPUS_DIR}'
-    if 'win' in PLATFORM:
+    if not 'darwin' in PLATFORM:
         sep = '\\'
         fullPathOpus += f'{sep}win'
+        encoder_name += '_win'
     else:
         sep = '/'
     fullPathOpus += f'{sep}{encoder_name}'
