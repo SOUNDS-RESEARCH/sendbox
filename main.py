@@ -43,9 +43,10 @@ def build_opus_path(encoder_name):
     depending on the platform."""
 
     fullPathOpus = f'{OPUS_DIR}'
-    if 'win' in PLATFORM:
+    if not 'darwin' in PLATFORM:
         sep = '\\'
         fullPathOpus += f'{sep}win'
+        encoder_name += '_win'
     else:
         sep = '/'
     fullPathOpus += f'{sep}{encoder_name}'
@@ -59,10 +60,10 @@ if __name__ == '__main__':
     call_opus_encoder(
         wav_filename=name,
         opus_out_name='output.opus',
-        encoder_name='opusenc_win'
+        encoder_name='opusenc'
     )
     call_opus_decoder(
         opus_filename='output.opus',
         wav_out_name='output.wav',
-        decoder_name='opusdec_win'
+        decoder_name='opusdec'
     )
