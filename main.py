@@ -9,6 +9,7 @@ def call_opus_encoder(
         opus_out_name,
         encoder_name='opusenc'
     ):
+    """Call the opus encoder with the given parameters."""
 
     fullPathOpus = build_opus_path(encoder_name)
 
@@ -24,7 +25,8 @@ def call_opus_decoder(
         opus_filename,
         wav_out_name,
         decoder_name='opusdec_win'
-    ): 
+    ):
+    """Call the opus decoder with the given parameters."""
 
     fullPathOpus = build_opus_path(decoder_name)
 
@@ -37,11 +39,16 @@ def call_opus_decoder(
 
 
 def build_opus_path(encoder_name):
-    
+    """Build the path to the opus encoder/decoder, 
+    depending on the platform."""
+
     fullPathOpus = f'{OPUS_DIR}'
     if 'win' in PLATFORM:
-        fullPathOpus += '\\win'
-    fullPathOpus += f'\\{encoder_name}'
+        sep = '\\'
+        fullPathOpus += f'{sep}win'
+    else:
+        sep = '/'
+    fullPathOpus += f'{sep}{encoder_name}'
     return fullPathOpus
 
 
