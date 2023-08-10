@@ -7,14 +7,15 @@ OPUS_DIR = 'opus'
 def call_opus_encoder(
         wav_filename,
         opus_out_name,
-        encoder_name='opusenc'
+        encoder_name='opusenc',
+        bitrate=160
     ):
     """Call the opus encoder with the given parameters."""
 
     fullPathOpus = build_opus_path(encoder_name)
 
     encoding_check = os.system(
-        f'{fullPathOpus} --bitrate 160 {wav_filename} {opus_out_name}'
+        f'{fullPathOpus} --bitrate {bitrate} {wav_filename} {opus_out_name}'
     )
 
     if encoding_check == 1:
