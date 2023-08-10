@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-def digital_modeller(message_bits)
+def digital_modeller(bits)
 
     from __future__ import division, print_function  # Python 2 compatibility
     
