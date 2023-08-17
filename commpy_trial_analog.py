@@ -1,20 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-def digital_modeller(bits)
+import math
 
-    from __future__ import division, print_function  # Python 2 compatibility
-    
-    import math
-    
-    import matplotlib.pyplot as plt
-    import numpy as np
-    
-    import commpy.channelcoding.convcode as cc
-    import commpy.channels as chan
-    import commpy.links as lk
-    import commpy.modulation as mod
-    import commpy.utilities as util
+import matplotlib.pyplot as plt
+import numpy as np
+
+import commpy.channelcoding.convcode as cc
+import commpy.channels as chan
+import commpy.links as lk
+import commpy.modulation as mod
+
+def digital_modeller(bits):
     
     # =============================================================================
     # Convolutional Code 1: G(D) = [1+D^2, 1+D+D^2]
