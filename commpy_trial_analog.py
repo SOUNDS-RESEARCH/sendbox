@@ -11,7 +11,7 @@ import commpy.channels as chan
 import commpy.links as lk
 import commpy.modulation as mod
 
-def digital_modeller(bits):
+def analog_modeller(bits):
     
     # =============================================================================
     # Convolutional Code 1: G(D) = [1+D^2, 1+D+D^2]
@@ -26,7 +26,6 @@ def digital_modeller(bits):
     # Create trellis data structure
     trellis = cc.Trellis(memory, g_matrix)
     
-            
     # ==================================================================================================
     # Complete example using Commpy features and compare hard and soft demodulation. Example with code 1
     # ==================================================================================================
@@ -39,7 +38,6 @@ def digital_modeller(bits):
     
     # SNR range to test
     SNRs = np.arange(0, 6) + 10 * math.log10(modem.num_bits_symbol)
-    
     
     # Modulation function
     def modulate(bits):
