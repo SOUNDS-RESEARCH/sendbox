@@ -9,14 +9,16 @@ def call_opus_encoder(
         wav_filename,
         opus_out_name,
         encoder_name='opusenc',
-        bitrate=160
+        bitrate=160,
+        framesize = 5 # (ms) availables 2.5, 5, 10, 20, 40, and 60
+
     ):
     """Call the opus encoder with the given parameters."""
 
     fullPathOpus = build_opus_path(encoder_name)
 
     encoding_check = os.system(
-        f'{fullPathOpus} --bitrate {bitrate} {wav_filename} {opus_out_name}'
+        f'{fullPathOpus} --bitrate {bitrate} --framesize {framesize} {wav_filename} {opus_out_name}'
     )
 
     if encoding_check == 1:
@@ -63,6 +65,7 @@ if __name__ == '__main__':
     call_opus_encoder(
         wav_filename='test.flac',
         opus_out_name=opus_out_name,
+        framesize = 5
     )
 
     # Decode OPUS file into audio
