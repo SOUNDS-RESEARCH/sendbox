@@ -15,7 +15,7 @@ import os
 from sys import platform as PLATFORM
 OPUS_DIR = 'opus'
 
-FILENAME = 'test.flac'
+FILENAME = 'output.opus'
 SEED = 0
 
 def main():
@@ -27,14 +27,6 @@ def main():
     #     wav_filename='test.flac',
     #     opus_out_name=opus_out_name,
     # )
-    
-    print('Calling OPUS decoder...')
-    call_opus_decoder(
-        opus_filename='output.opus',
-        wav_out_name='output2.wav'
-    )
-
-
 
     data = read_opus(FILENAME)
 
@@ -43,10 +35,10 @@ def main():
     # Extract actual bits as np.ndarray
     bitsList = np.array([int(b) for b in bitArray.bin])
 
-    bitsList = bitsList[:8**5]
+    bitsList = bitsList[:8**6]
 
     # Modify bits as you want
-    decodedBits = cta.analog_modeller(bitsList, noiseStd=0.0, plot=False)
+    decodedBits = cta.analog_modeller(bitsList, noiseStd=0.75, plot=False)
     # Go back to bytes via BitArray object
     backToBytes = BitArray(decodedBits).bytes
 
@@ -57,7 +49,7 @@ def main():
     # Call OPUS decoder
     print('Calling OPUS decoder...')
     call_opus_decoder(
-        opus_filename='output.opus',
+        opus_filename='output2.opus',
         wav_out_name='output2.wav'
     )
 
@@ -120,7 +112,7 @@ def build_opus_path(encoder_name):
     if not 'darwin' in PLATFORM:
         sep = '\\'
         fullPathOpus += f'{sep}win'
-        encoder_name += '_win'
+        # encoder_name += '_win'
     else:
         sep = '/'
     fullPathOpus += f'{sep}{encoder_name}'
