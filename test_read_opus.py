@@ -1,62 +1,104 @@
 # Purpose of script:
 # Test the read_opus function.
 #
-# (c) Paul Didier, SOUNDS ETN, KU Leuven ESAT STADIUS
+# (c) Paul Didier, Mohammad Bokaei, José Miguel Cadavid Tobón, SOUNDS ETN
 
-import sys
-import numpy as np
-from bitstring import BitArray
-import commpy_trial_digital as ctd
-import commpy_trial_analog as cta
-import numpy as np
 import os
+import sys
+import pydub  # requires ffmpeg
+import numpy as np
 from pathlib import Path
+from bitstring import BitArray
+import commpy_trial_analog as cta
 
-# Global variables
 from sys import platform as PLATFORM
-OPUS_DIR = 'opus'
-
+OPUS_DIRECTORY = 'opus'
 INPUT_WAV_FILENAME = 'test_short.wav'
 SEED = 0
+SNR = 10  # AWGN channel SNR [dB]
+SIZE_OF_QAM_CONSTELLATION = 64
 
-def main():
+AUDIO_CODEC = 'opus'  # 'opus' or something else
+
+def main(inWavFilename=INPUT_WAV_FILENAME):
     """Main function (called by default when running script)."""
 
     # Set seed for reproducibility
     np.random.seed(SEED)
 
-    # Call OPUS encoder
-    print('Calling OPUS encoder...')
-    opusOutFilename = Path(INPUT_WAV_FILENAME).stem + '_to_opus.opus'
-    call_opus_encoder(
-        wav_filename=INPUT_WAV_FILENAME,
-        opus_out_name=opusOutFilename,
+    # # Call OPUS encoder
+    # if AUDIO_CODEC == 'opus':
+    #     raise Exception('OPUS codec not working yet.') 
+    #     print('Calling OPUS encoder...')
+    #     opusOutFilename = Path(inWavFilename).stem + '_to_opus.opus'
+    #     call_opus_encoder(
+    #         wav_filename=inWavFilename,
+    #         opus_out_name=opusOutFilename,
+    #     )
+    #     # Read OPUS file
+    #     print('Reading OPUS file...')
+    #     data = read_opus(opusOutFilename)
+    # else:
+    audio: pydub.AudioSegment = pydub.AudioSegment.from_file(
+        inWavFilename,
+        format="wav"
     )
-
-    # Read OPUS file
-    data = read_opus(opusOutFilename)
+    print(f'Calling {AUDIO_CODEC.capitalize()} encoder...')
+    encOutFilename = Path(inWavFilename).stem + f'_to_{AUDIO_CODEC}.{AUDIO_CODEC}'
+    audio.export(
+        encOutFilename,
+        format=AUDIO_CODEC,
+    )
+    # Read MP3 file
+    print(f'Reading {AUDIO_CODEC.capitalize()} file...')
+    audioEncoded: pydub.AudioSegment = pydub.AudioSegment.from_file(
+        encOutFilename,
+        format=AUDIO_CODEC
+    )
+    data = audioEncoded.raw_data
 
     # Convert to BitArray object
+    print('Converting to BitArray object...')
     bitArray = BitArray(bytes=data)
     # Extract actual bits as np.ndarray
     bitsList = np.array([int(b) for b in bitArray.bin])
 
     # Modify bits as you want
-    decodedBits = cta.analog_modeller(bitsList, noiseStd=0.1, plot=False)
-    # Go back to bytes via BitArray object
+    print('----- Modifying bits (channel effect) -----')
+    decodedBits = cta.analog_modeller(
+        bitsList,
+        snr=SNR,
+        plot=False,
+        sizeOfQamConstellation=SIZE_OF_QAM_CONSTELLATION
+    )
     backToBytes = BitArray(decodedBits).bytes
+    print('----- Done modifying bits -----')
 
-    # Write OPUS file
-    print('Writing OPUS file...')
-    modifiedOpusFilename = Path(INPUT_WAV_FILENAME).stem + '_to_opus_modified.opus'
-    write_opus(modifiedOpusFilename, backToBytes)
+    backToWavFilename = f'{Path(inWavFilename).stem}_{AUDIO_CODEC}_codec_{SNR}dB_noise_QAM{SIZE_OF_QAM_CONSTELLATION}.wav'
+    # if AUDIO_CODEC == 'opus':
+    #     # Write OPUS file
+    #     print('Writing OPUS file...')
+    #     modifiedOpusFilename = f'{Path(inWavFilename).stem}_to_opus_modified.opus'
+    #     write_opus(modifiedOpusFilename, backToBytes)
 
-    # Call OPUS decoder
-    print('Calling OPUS decoder...')
-    backToWavFilename = Path(INPUT_WAV_FILENAME).stem + '_back_to_wav.wav'
-    call_opus_decoder(
-        opus_filename=modifiedOpusFilename,
-        wav_out_name=backToWavFilename
+    #     # Call OPUS decoder
+    #     print('Calling OPUS decoder...')
+    #     call_opus_decoder(
+    #         opus_filename=modifiedOpusFilename,
+    #         wav_out_name=backToWavFilename
+    #     )
+    # else:
+    # Write WAV file
+    print('Writing WAV file...')
+    audioForOutput = pydub.AudioSegment(
+        data=backToBytes,
+        sample_width=audioEncoded.sample_width,
+        frame_rate=audioEncoded.frame_rate,
+        channels=audioEncoded.channels
+    )
+    audioForOutput.export(
+        backToWavFilename,
+        format="wav",
     )
 
 
@@ -110,11 +152,11 @@ def call_opus_decoder(
         raise Exception("Decoding failed !!")
 
 
-def build_opus_path(encoder_name):
+def build_opus_path(encoder_name, opus_dir=OPUS_DIRECTORY):
     """Build the path to the opus encoder/decoder, 
     depending on the platform."""
 
-    fullPathOpus = f'{OPUS_DIR}'
+    fullPathOpus = opus_dir
     if not 'darwin' in PLATFORM:
         sep = '\\'
         fullPathOpus += f'{sep}win'
