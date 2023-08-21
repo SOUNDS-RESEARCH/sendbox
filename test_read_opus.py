@@ -10,47 +10,53 @@ import commpy_trial_digital as ctd
 import commpy_trial_analog as cta
 import numpy as np
 import os
+from pathlib import Path
 
 # Global variables
 from sys import platform as PLATFORM
 OPUS_DIR = 'opus'
 
-FILENAME = 'output.opus'
+INPUT_WAV_FILENAME = 'test_short.wav'
 SEED = 0
 
 def main():
     """Main function (called by default when running script)."""
 
+    # Set seed for reproducibility
     np.random.seed(SEED)
 
-    # call_opus_encoder(
-    #     wav_filename='test.flac',
-    #     opus_out_name=opus_out_name,
-    # )
+    # Call OPUS encoder
+    print('Calling OPUS encoder...')
+    opusOutFilename = Path(INPUT_WAV_FILENAME).stem + '_to_opus.opus'
+    call_opus_encoder(
+        wav_filename=INPUT_WAV_FILENAME,
+        opus_out_name=opusOutFilename,
+    )
 
-    data = read_opus(FILENAME)
+    # Read OPUS file
+    data = read_opus(opusOutFilename)
 
     # Convert to BitArray object
     bitArray = BitArray(bytes=data)
     # Extract actual bits as np.ndarray
     bitsList = np.array([int(b) for b in bitArray.bin])
 
-    bitsList = bitsList[:8**6]
-
     # Modify bits as you want
-    decodedBits = cta.analog_modeller(bitsList, noiseStd=0.75, plot=False)
+    decodedBits = cta.analog_modeller(bitsList, noiseStd=0.1, plot=False)
     # Go back to bytes via BitArray object
     backToBytes = BitArray(decodedBits).bytes
 
     # Write OPUS file
     print('Writing OPUS file...')
-    write_opus('output2.opus', backToBytes)
+    modifiedOpusFilename = Path(INPUT_WAV_FILENAME).stem + '_to_opus_modified.opus'
+    write_opus(modifiedOpusFilename, backToBytes)
 
     # Call OPUS decoder
     print('Calling OPUS decoder...')
+    backToWavFilename = Path(INPUT_WAV_FILENAME).stem + '_back_to_wav.wav'
     call_opus_decoder(
-        opus_filename='output2.opus',
-        wav_out_name='output2.wav'
+        opus_filename=modifiedOpusFilename,
+        wav_out_name=backToWavFilename
     )
 
 
