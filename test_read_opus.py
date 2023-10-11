@@ -17,8 +17,8 @@ INPUT_WAV_FILENAME = 'test_short.wav'
 SEED = 0
 SNR = 10  # AWGN channel SNR [dB]
 SIZE_OF_QAM_CONSTELLATION = 64
-FRAME_SIZE = '2.5' #ms
-BITRATE = '32K' # kb
+FRAME_SIZE = 2.5 #ms
+BITRATE = 32 # kb
 
 AUDIO_CODEC = 'opus'  # 'opus' or something else
 
@@ -28,33 +28,12 @@ def main(inWavFilename=INPUT_WAV_FILENAME):
     # Set seed for reproducibility
     np.random.seed(SEED)
 
-    # # Call OPUS encoder
-    # if AUDIO_CODEC == 'opus':
-    #     raise Exception('OPUS codec not working yet.') 
-    #     print('Calling OPUS encoder...')
-    #     opusOutFilename = Path(inWavFilename).stem + '_to_opus.opus'
-    #     call_opus_encoder(
-    #         wav_filename=inWavFilename,
-    #         opus_out_name=opusOutFilename,
-    #     )
-    #     # Read OPUS file
-    #     print('Reading OPUS file...')
-    #     data = read_opus(opusOutFilename)
-    # else:
-
-   
-
-    audio: pydub.AudioSegment = pydub.AudioSegment.from_file(
-        inWavFilename,
-        format="wav"
-    )
     print(f'Calling {AUDIO_CODEC.capitalize()} encoder...')
     encOutFilename = Path(inWavFilename).stem + f'_to_{AUDIO_CODEC}.{AUDIO_CODEC}'
-
     if (Path(encOutFilename).exists()):
         os.remove(encOutFilename)
-
-    os.system(f'ffmpeg -i {inWavFilename} -frame_duration {FRAME_SIZE} -b:a {BITRATE} -vbr off {encOutFilename}')
+    os.system(f'ffmpeg -i {inWavFilename} -frame_duration {FRAME_SIZE} -b:a {BITRATE}K -vbr off {encOutFilename}')
+    
     print(f'Reading {AUDIO_CODEC.capitalize()} file...')
     audioEncoded: pydub.AudioSegment = pydub.AudioSegment.from_file(
         encOutFilename,
@@ -81,19 +60,7 @@ def main(inWavFilename=INPUT_WAV_FILENAME):
     print('----- Done modifying bits -----')
 
     backToWavFilename = f'{Path(inWavFilename).stem}_{AUDIO_CODEC}_codec_{SNR}dB_noise_QAM{SIZE_OF_QAM_CONSTELLATION}.wav'
-    # if AUDIO_CODEC == 'opus':
-    #     # Write OPUS file
-    #     print('Writing OPUS file...')
-    #     modifiedOpusFilename = f'{Path(inWavFilename).stem}_to_opus_modified.opus'
-    #     write_opus(modifiedOpusFilename, backToBytes)
 
-    #     # Call OPUS decoder
-    #     print('Calling OPUS decoder...')
-    #     call_opus_decoder(
-    #         opus_filename=modifiedOpusFilename,
-    #         wav_out_name=backToWavFilename
-    #     )
-    # else:
     # Write WAV file
     print('Writing WAV file...')
     audioForOutput = pydub.AudioSegment(
