@@ -17,6 +17,8 @@ INPUT_WAV_FILENAME = 'test_short.wav'
 SEED = 0
 SNR = 10  # AWGN channel SNR [dB]
 SIZE_OF_QAM_CONSTELLATION = 64
+FRAME_SIZE = '2.5' #ms
+BITRATE = '32K' # kb
 
 AUDIO_CODEC = 'opus'  # 'opus' or something else
 
@@ -39,21 +41,25 @@ def main(inWavFilename=INPUT_WAV_FILENAME):
     #     print('Reading OPUS file...')
     #     data = read_opus(opusOutFilename)
     # else:
+
+   
+
     audio: pydub.AudioSegment = pydub.AudioSegment.from_file(
         inWavFilename,
         format="wav"
     )
     print(f'Calling {AUDIO_CODEC.capitalize()} encoder...')
     encOutFilename = Path(inWavFilename).stem + f'_to_{AUDIO_CODEC}.{AUDIO_CODEC}'
-    audio.export(
-        encOutFilename,
-        format=AUDIO_CODEC,
-    )
-    # Read MP3 file
+
+    if (Path(encOutFilename).exists()):
+        os.remove(encOutFilename)
+
+    os.system(f'ffmpeg -i {inWavFilename} -frame_duration {FRAME_SIZE} -b:a {BITRATE} -vbr off {encOutFilename}')
     print(f'Reading {AUDIO_CODEC.capitalize()} file...')
     audioEncoded: pydub.AudioSegment = pydub.AudioSegment.from_file(
         encOutFilename,
-        format=AUDIO_CODEC
+        # format=AUDIO_CODEC,
+        codec = 'opus'
     )
     data = audioEncoded.raw_data
 
