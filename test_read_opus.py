@@ -14,13 +14,14 @@ import commpy_trial_analog as cta
 from sys import platform as PLATFORM
 
 # Global variables (change as you want)
-OPUS_DIRECTORY = 'opus'  # directory where opus encoder/decoder is located
-INPUT_WAV_FILENAME = 'test_short.wav'  # input WAV file
 SEED = 0  # seed for reproducibility
 SNR = 10  # AWGN channel SNR [dB]
 SIZE_OF_QAM_CONSTELLATION = 64  # 4, 16, 64, 256, 1024, 4096, 16384 (cf. `cta.analog_modeller`)
 FRAME_SIZE = 2.5  # OPUS encoding frame size [ms]
 BITRATE = 32  # OPUS encoding bitrate [kbits/s]
+INPUT_WAV_FILENAME = '.\\input\\test_short.wav'  # input WAV file
+OUTPUT_FOLDER = '.\\output'  # folder where output files will be saved (e.g., OPUS & WAV files)
+OPUS_DIRECTORY = '.\\opus'  # directory where opus encoder/decoder is located
 
 # Probably don't change these
 AUDIO_CODEC = 'opus'  # 'opus' or something else (e.g., 'mp3')
@@ -33,10 +34,11 @@ def main(inWavFilename=INPUT_WAV_FILENAME):
 
     # Encode WAV file to OPUS
     print(f'Calling {AUDIO_CODEC.capitalize()} encoder...')
-    encOutFilename = Path(inWavFilename).stem + f'_to_{AUDIO_CODEC}.{AUDIO_CODEC}'
+    encOutFilename = f'{OUTPUT_FOLDER}\\{Path(inWavFilename).stem}_to_{AUDIO_CODEC}.{AUDIO_CODEC}'
     if (Path(encOutFilename).exists()):
         os.remove(encOutFilename)
     os.system(f'ffmpeg -i {inWavFilename} -frame_duration {FRAME_SIZE} -b:a {BITRATE}K -vbr off {encOutFilename}')
+    print(f'Exported OPUS file ("{encOutFilename}").')
     
     # Read OPUS file
     print(f'Reading {AUDIO_CODEC.capitalize()} file...')
@@ -63,7 +65,7 @@ def main(inWavFilename=INPUT_WAV_FILENAME):
     print('----- Done modifying bits -----')
 
     # Write modified bits to WAV file
-    backToWavFilename = f'{Path(inWavFilename).stem}_{AUDIO_CODEC}_codec_{SNR}dB_noise_QAM{SIZE_OF_QAM_CONSTELLATION}.wav'
+    backToWavFilename = f'{OUTPUT_FOLDER}\\{Path(inWavFilename).stem}_{AUDIO_CODEC}_codec_{SNR}dB_noise_QAM{SIZE_OF_QAM_CONSTELLATION}.wav'
     print('Writing WAV file...')
     audioForOutput = pydub.AudioSegment(
         data=backToBytes,
@@ -75,6 +77,8 @@ def main(inWavFilename=INPUT_WAV_FILENAME):
         backToWavFilename,
         format="wav",
     )
+    print(f'Exported WAV file ("{backToWavFilename}").')
+    print('Done.')
 
 
 def read_opus(fileName):
